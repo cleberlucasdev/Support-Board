@@ -51,10 +51,10 @@ body {
   background: linear-gradient(180deg, rgba(255, 26, 42, 0.06), transparent);
 }
 
-.topbar .left { display: flex; align-items: center; gap: 20px; }
-.topbar .left img { height: 36px; opacity: 0.95; }
-.topbar .left .divider { width: 1px; height: 28px; background: var(--line-2); }
-.topbar .left .title { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.18em; color: var(--fg-2); }
+.topbar .left { display: flex; align-items: center; gap: 20px; min-width: 0; overflow: hidden; }
+.topbar .left img { height: 36px; opacity: 0.95; flex-shrink: 0; }
+.topbar .left .divider { width: 1px; height: 28px; background: var(--line-2); flex-shrink: 0; }
+.topbar .left .title { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.18em; color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 .topbar .center { display: flex; gap: 28px; }
 .kpi {
