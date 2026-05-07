@@ -111,7 +111,7 @@ function renderCard(task, featured = false) {
 // ── render ────────────────────────────────────────────────────────────────
 function render() {
   const open = openTasks();
-  const all = open.slice(0, 14);
+  const all = open.slice(0, 8);
 
   document.getElementById('featured-row').innerHTML = '';
   document.getElementById('grid-row').innerHTML =
