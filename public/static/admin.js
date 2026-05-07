@@ -86,6 +86,7 @@ function nowMySQL() {
 // ── state ─────────────────────────────────────────────────────────────────
 let tasks = [];
 let selectedId = null;
+let checkedIds = new Set(); // tasks selected for bulk actions
 let navFilter = 'active';
 let urgencyFilter = 'all';
 let searchQuery = '';
@@ -97,8 +98,11 @@ async function loadTasks() {
     const res = await fetch(API_URL, { cache: 'no-store' });
     if (!res.ok) return;
     tasks = (await res.json()).map(adaptTask);
+    const existingIds = new Set(tasks.map(t => t.id));
+    for (const id of checkedIds) { if (!existingIds.has(id)) checkedIds.delete(id); }
     renderList();
     updateNavCounts();
+    renderBulkBar();
     if (selectedId !== null && !panelDirty) {
       const t = tasks.find(x => x.id === selectedId);
       if (t) populatePanel(t);
@@ -147,13 +151,14 @@ function renderRow(t) {
   const u = N.urgencyLevel(t);
   const isDone = t.status === 'done';
   const isSelected = t.id === selectedId;
+  const isChecked = checkedIds.has(t.id);
   const dueLabel = isDone ? N.statusLabel.done : (u === 'overdue'
     ? N.formatCountdown(t.dueAt !== null ? t.dueAt - Date.now() : null)
     : N.formatDueLabel(t));
   return `
-    <div class="task-row urgency-${u}${isSelected ? ' selected' : ''}" data-id="${t.id}" onclick="selectTask(${t.id})">
+    <div class="task-row urgency-${u}${isSelected ? ' selected' : ''}${isChecked ? ' bulk-checked' : ''}" data-id="${t.id}" onclick="selectTask(${t.id})">
       <span class="row-stripe"></span>
-      <span class="row-checkbox${isDone ? ' done' : ''}" onclick="event.stopPropagation();toggleDone(${t.id})">${isDone ? '✓' : ''}</span>
+      <span class="row-checkbox${isChecked ? ' checked' : ''}" onclick="event.stopPropagation();toggleCheck(${t.id})">${isChecked ? '✓' : ''}</span>
       <div class="row-main">
         <div class="row-title${isDone ? ' is-done' : ''}">${esc(t.title)}</div>
         <div class="row-meta">
@@ -181,15 +186,54 @@ function selectTask(id) {
   renderList();
 }
 
-async function toggleDone(id) {
-  const t = tasks.find(x => x.id === id);
-  if (!t) return;
-  const newStatus = t.status === 'done' ? 'pending' : 'done';
-  await fetch(`${API_URL}/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: newStatus }),
-  });
+function toggleCheck(id) {
+  if (checkedIds.has(id)) { checkedIds.delete(id); } else { checkedIds.add(id); }
+  renderList();
+  renderBulkBar();
+}
+
+function renderBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  if (checkedIds.size === 0) { bar.hidden = true; return; }
+  const n = checkedIds.size;
+  bar.hidden = false;
+  bar.innerHTML = `
+    <span class="bulk-count">${n} tarefa${n !== 1 ? 's' : ''} selecionada${n !== 1 ? 's' : ''}</span>
+    <div class="bulk-actions">
+      <button class="btn btn-success" onclick="bulkAction('done')">✓ Concluir</button>
+      <button class="btn" onclick="bulkAction('in_progress')" style="color:var(--u-warn)">▶ Em andamento</button>
+      <button class="btn" onclick="bulkAction('pending')">⏸ Pausar</button>
+      <button class="btn" onclick="bulkDelete()" style="color:var(--u-over)">✕ Excluir</button>
+    </div>
+    <button class="btn" onclick="clearChecked()">Cancelar</button>`;
+}
+
+async function bulkAction(status) {
+  const ids = [...checkedIds];
+  await Promise.all(ids.map(id =>
+    fetch(`${API_URL}/${id}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+  ));
+  checkedIds.clear();
   await loadTasks();
+}
+
+async function bulkDelete() {
+  const n = checkedIds.size;
+  if (!confirm(`Excluir ${n} tarefa${n !== 1 ? 's' : ''}? Esta ação não pode ser desfeita.`)) return;
+  const ids = [...checkedIds];
+  await Promise.all(ids.map(id => fetch(`${API_URL}/${id}`, { method: 'DELETE' })));
+  checkedIds.clear();
+  if (ids.includes(selectedId)) { selectedId = null; clearPanel(); }
+  await loadTasks();
+}
+
+function clearChecked() {
+  checkedIds.clear();
+  renderList();
+  renderBulkBar();
 }
 
 // ── edit panel ────────────────────────────────────────────────────────────
@@ -251,7 +295,7 @@ function populatePanel(t) {
           <input type="checkbox" name="has_timer" id="cb-timer" ${t.has_timer ? 'checked' : ''}>
           Ativar cronômetro
         </label>
-        <div class="timer-subfields" id="timer-fields" ${t.has_timer ? '' : 'hidden'}>
+        <div class="timer-subfields" id="timer-fields" ${t.has_timer ? '' : 'style="display:none"'}>
           <div class="field" style="margin:0">
             <label>Duração (minutos)</label>
             <input type="number" name="timer_duration_minutes" min="1" value="${t.timer_duration_minutes || ''}">
@@ -446,7 +490,7 @@ document.getElementById('edit-panel').addEventListener('input', () => {
 document.getElementById('edit-panel').addEventListener('change', (e) => {
   if (e.target.name === 'has_timer') {
     const tf = document.getElementById('timer-fields');
-    if (tf) tf.hidden = !e.target.checked;
+    if (tf) tf.style.display = e.target.checked ? 'flex' : 'none';
   }
   panelDirty = true;
 });
@@ -487,4 +531,7 @@ loadTasks();
 
 // expose for inline onclick handlers
 window.selectTask = selectTask;
-window.toggleDone = toggleDone;
+window.toggleCheck = toggleCheck;
+window.bulkAction = bulkAction;
+window.bulkDelete = bulkDelete;
+window.clearChecked = clearChecked;
