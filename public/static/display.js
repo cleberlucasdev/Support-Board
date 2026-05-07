@@ -26,6 +26,11 @@ const N = {
     const sign = ms < 0 ? '-' : '';
     const abs = Math.abs(ms);
     const totalSec = Math.floor(abs / 1000);
+    if (totalSec >= 86400) {
+      const days = Math.floor(totalSec / 86400);
+      const hrs = Math.floor((totalSec % 86400) / 3600);
+      return `${sign}${days}d, ${hrs}hrs`;
+    }
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
@@ -82,40 +87,12 @@ function openTasks() {
 }
 
 // ── renderers ─────────────────────────────────────────────────────────────
-function renderFeatured(task) {
+function renderCard(task, featured = false) {
   const ms = N.msRemaining(task);
   const u = N.urgencyLevel(task);
-  const isOverdue = u === 'overdue';
-  const lbl = isOverdue ? 'ATRASADA' : (task.dueAt !== null ? 'PRAZO RESTANTE' : '');
+  const cls = `task-card urgency-${u}${featured ? ' featured' : ''}`;
   return `
-    <article class="task-card featured${isOverdue ? ' overdue' : ''}" data-id="${task.id}">
-      <svg class="arc-bg" viewBox="0 0 800 200" preserveAspectRatio="none">
-        <path d="M -50 280 A 320 320 0 0 1 320 -40" fill="none" stroke="rgba(255,26,42,0.18)" stroke-width="1.5"/>
-        <path d="M -50 360 A 420 420 0 0 1 420 -80" fill="none" stroke="rgba(255,26,42,0.12)" stroke-width="1.5"/>
-        <path d="M -50 440 A 520 520 0 0 1 520 -120" fill="none" stroke="rgba(255,26,42,0.08)" stroke-width="1.5"/>
-      </svg>
-      <div class="content">
-        <div class="meta-row">
-          <span class="priority-chip ${task.priority}">${N.priorityLabel[task.priority]}</span>
-          <span class="status-meta">
-            <span class="status-dot ${task.status}"></span>${N.statusLabel[task.status]}
-          </span>
-        </div>
-        <h2>${esc(task.title)}</h2>
-        ${task.description ? `<p>${esc(task.description)}</p>` : ''}
-      </div>
-      <div class="countdown-big ${u}">
-        ${lbl ? `<span class="lbl">${lbl}</span>` : ''}
-        <span class="time"${task.dueAt !== null ? ` data-due="${task.dueAt}"` : ''}>${N.formatCountdown(ms)}</span>
-      </div>
-    </article>`;
-}
-
-function renderCard(task) {
-  const ms = N.msRemaining(task);
-  const u = N.urgencyLevel(task);
-  return `
-    <article class="task-card urgency-${u}" data-id="${task.id}">
+    <article class="${cls}" data-id="${task.id}">
       <span class="left-stripe"></span>
       <div class="meta-row">
         <span class="priority-chip ${task.priority}">${N.priorityLabel[task.priority]}</span>
@@ -134,11 +111,11 @@ function renderCard(task) {
 // ── render ────────────────────────────────────────────────────────────────
 function render() {
   const open = openTasks();
-  const featured = open.slice(0, 2);
-  const rest = open.slice(2, 14);
+  const all = open.slice(0, 14);
 
-  document.getElementById('featured-row').innerHTML = featured.map(renderFeatured).join('');
-  document.getElementById('grid-row').innerHTML = rest.map(renderCard).join('');
+  document.getElementById('featured-row').innerHTML = '';
+  document.getElementById('grid-row').innerHTML =
+    all.map((task, i) => renderCard(task, i < 2)).join('');
 
   const now = Date.now();
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
