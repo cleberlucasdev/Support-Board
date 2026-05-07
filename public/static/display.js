@@ -121,6 +121,7 @@ function renderCard(task) {
         <span class="priority-chip ${task.priority}">${N.priorityLabel[task.priority]}</span>
       </div>
       <h3>${esc(task.title)}</h3>
+      ${task.description ? `<p class="card-desc">${esc(task.description)}</p>` : ''}
       <div class="countdown-row">
         <div class="countdown-mid ${u}"${task.dueAt !== null ? ` data-due="${task.dueAt}"` : ''}>${N.formatCountdown(ms)}</div>
       </div>
