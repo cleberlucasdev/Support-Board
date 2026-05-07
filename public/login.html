@@ -36,8 +36,9 @@ body {
 .field input {
   background: var(--bg-2); border: 1px solid var(--line); color: var(--fg-1);
   padding: 12px 14px; border-radius: 8px;
-  font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 500;
-  outline: none; transition: border-color .15s; letter-spacing: 0.1em;
+  font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500;
+  outline: none; transition: border-color .15s; letter-spacing: 0.22em;
+  caret-color: var(--brand);
 }
 .field input:focus { border-color: var(--brand); }
 .btn-login {
@@ -59,33 +60,56 @@ body {
   </div>
   <div class="field">
     <label>Senha de acesso</label>
-    <input type="password" id="pw" placeholder="••••••••" autofocus>
+    <input type="text" id="pw" autocomplete="off" spellcheck="false" autofocus>
   </div>
   <button class="btn-login" id="btn">Entrar</button>
   <div class="error" id="err"></div>
 </div>
 <script>
   const next = new URLSearchParams(location.search).get('next') || '/admin';
+  let realPw = '';
+  const pwInput = document.getElementById('pw');
+
+  pwInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { login(); e.preventDefault(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();
+    if (e.key === 'Backspace') {
+      realPw = realPw.slice(0, -1);
+    } else if (e.key === 'Delete') {
+      realPw = '';
+    } else if (e.key.length === 1) {
+      realPw += e.key;
+    }
+    pwInput.value = '*'.repeat(realPw.length);
+  });
+
+  pwInput.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+    realPw += pasted;
+    pwInput.value = '*'.repeat(realPw.length);
+  });
 
   async function login() {
-    const pw = document.getElementById('pw').value;
+    if (!realPw) return;
     const btn = document.getElementById('btn');
     const err = document.getElementById('err');
-    if (!pw) return;
     btn.disabled = true;
     err.textContent = '';
     try {
       const res = await fetch('/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw }),
+        body: JSON.stringify({ password: realPw }),
       });
       if (res.ok) {
         location.href = next;
       } else {
         err.textContent = 'Senha incorreta.';
-        document.getElementById('pw').value = '';
-        document.getElementById('pw').focus();
+        realPw = '';
+        pwInput.value = '';
+        pwInput.focus();
       }
     } catch {
       err.textContent = 'Erro de conexão.';
@@ -94,7 +118,6 @@ body {
   }
 
   document.getElementById('btn').addEventListener('click', login);
-  document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 </script>
 </body>
 </html>
