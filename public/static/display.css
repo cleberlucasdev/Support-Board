@@ -195,6 +195,8 @@ body {
   overflow: hidden;
 }
 
+.grid-row .task-card { height: 220px; }
+
 .task-card.urgency-critical { border-color: rgba(255, 90, 71, 0.5); background: linear-gradient(180deg, rgba(255, 90, 71, 0.08), var(--bg-1) 60%); }
 .task-card.urgency-warning  { border-color: rgba(255, 177, 61, 0.35); }
 .task-card.urgency-overdue {
