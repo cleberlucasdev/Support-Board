@@ -1,0 +1,239 @@
+/* =====================================================================
+   Tríade Fibra — Design Tokens
+   ---------------------------------------------------------------------
+   Single source of truth for color, type, spacing, radii, shadows.
+   Import once in any HTML:  <link rel="stylesheet" href="../colors_and_type.css">
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---------- COLOR ---------- */
+
+  /* Brand — saturated red, the only chromatic hue in the system */
+  --brand-50:  #FFF1F2;
+  --brand-100: #FFD9DC;
+  --brand-200: #FBB1B6;
+  --brand-300: #F47A82;
+  --brand-400: #EC3D49;
+  --brand-500: #E30613;   /* alt — pure pillar */
+  --brand-600: #D70410;   /* PRIMARY — the wordmark red */
+  --brand-700: #B5050F;
+  --brand-800: #8B0A12;   /* deep crimson — gradient pool, footer accents */
+  --brand-900: #5C0309;
+
+  /* Ink — true neutrals, slightly warm */
+  --ink-900: #0F0D0E;     /* near-black, footer, body on white */
+  --ink-800: #1F1B1C;
+  --ink-700: #3A3536;
+  --ink-600: #5A5454;
+  --ink-500: #807A7A;     /* secondary text */
+  --ink-400: #ADA7A7;
+  --ink-300: #D6D2D2;
+  --ink-200: #EDE7E4;     /* hairline borders */
+  --ink-100: #F5F1EE;
+  --paper:   #FAF7F4;     /* warm off-white surface */
+  --white:   #FFFFFF;
+
+  /* Semantic */
+  --fg-1: var(--ink-900);
+  --fg-2: var(--ink-700);
+  --fg-3: var(--ink-500);
+  --fg-on-brand: var(--white);
+  --bg-1: var(--white);
+  --bg-2: var(--paper);
+  --bg-inverted: var(--ink-900);
+  --border-1: var(--ink-200);
+  --border-2: var(--ink-300);
+
+  /* Status — desaturated so they don't fight the brand red */
+  --success: #1F8A5B;
+  --success-bg: #E8F3EE;
+  --warning: #C77A0A;
+  --warning-bg: #FBF1E0;
+  --danger:  var(--brand-600);
+  --danger-bg: var(--brand-50);
+  --info:    #2A6FDB;
+  --info-bg: #E5EEFB;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-display: 'Anton', 'Oswald', 'Impact', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale — 1.250 modular, anchored at 16px body */
+  --text-xs:   12px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-md:   18px;
+  --text-lg:   20px;
+  --text-xl:   24px;
+  --text-2xl:  32px;
+  --text-3xl:  44px;   /* h2 */
+  --text-4xl:  60px;   /* h1 */
+  --text-5xl:  88px;   /* hero display */
+  --text-6xl:  128px;  /* plan-speed numerals */
+
+  --leading-tight:  1.05;
+  --leading-snug:   1.2;
+  --leading-normal: 1.5;
+  --leading-loose:  1.7;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:  0.04em;
+  --tracking-eyebrow: 0.12em;
+
+  /* ---------- SPACING ---------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ---------- RADII ---------- */
+  --radius-sm:   6px;
+  --radius-md:   10px;     /* default */
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-pill: 999px;
+
+  /* ---------- SHADOWS ---------- */
+  --shadow-sm: 0 1px 2px rgba(15, 13, 14, 0.06);
+  --shadow-md: 0 6px 20px -8px rgba(139, 10, 18, 0.18), 0 2px 6px rgba(15, 13, 14, 0.05);
+  --shadow-lg: 0 24px 48px -16px rgba(139, 10, 18, 0.24), 0 4px 12px rgba(15, 13, 14, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(215, 4, 16, 0.25);
+
+  /* ---------- MOTION ---------- */
+  --ease-out:  cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in:   cubic-bezier(0.6, 0, 0.8, 0.2);
+  --duration-tap:    150ms;
+  --duration-hover:  220ms;
+  --duration-modal:  320ms;
+
+  /* ---------- LAYOUT ---------- */
+  --container-marketing: 1200px;
+  --container-portal:    1440px;
+  --gutter-mobile:  24px;
+  --gutter-desktop: 64px;
+  --nav-h: 72px;
+
+  /* ---------- SIGNATURE GRADIENT ---------- */
+  --gradient-brand-radial:
+    radial-gradient(ellipse at bottom left, var(--brand-800) 0%, var(--brand-600) 45%, var(--brand-500) 100%);
+  --gradient-brand-linear:
+    linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%);
+}
+
+/* =====================================================================
+   ELEMENT DEFAULTS — semantic styles for raw HTML tags
+   Apply these just by writing <h1>, <p>, etc.
+   ===================================================================== */
+
+html {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--fg-1);
+  background: var(--bg-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body { margin: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;            /* Anton ships at one weight */
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-normal);
+  color: var(--fg-1);
+  margin: 0 0 var(--space-4);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl);  font-family: var(--font-body); font-weight: 700; letter-spacing: var(--tracking-tight); }
+h5 { font-size: var(--text-lg);  font-family: var(--font-body); font-weight: 700; }
+h6 { font-size: var(--text-base);font-family: var(--font-body); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); }
+
+p {
+  margin: 0 0 var(--space-4);
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+small { font-size: var(--text-sm); color: var(--fg-3); }
+strong { font-weight: 700; color: var(--fg-1); }
+
+a {
+  color: var(--brand-600);
+  text-decoration: none;
+  text-underline-offset: 2px;
+  transition: color var(--duration-hover) var(--ease-out);
+}
+a:hover { color: var(--brand-700); text-decoration: underline; text-decoration-thickness: 2px; }
+a:focus-visible { outline: 2px solid var(--brand-600); outline-offset: 2px; border-radius: 2px; }
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+code {
+  background: var(--ink-100);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: var(--border-1);
+  margin: var(--space-7) 0;
+}
+
+::selection { background: var(--brand-600); color: var(--white); }
+
+/* =====================================================================
+   UTILITY CLASSES — shorthands seen in nearly every Tríade design
+   ===================================================================== */
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--brand-600);
+  margin-bottom: var(--space-3);
+  display: inline-block;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.005em;
+}
+
+.brand-surface {
+  background: var(--gradient-brand-radial);
+  color: var(--white);
+}
+.brand-surface h1, .brand-surface h2, .brand-surface h3,
+.brand-surface p, .brand-surface .eyebrow { color: var(--white); }
+.brand-surface .eyebrow { color: rgba(255,255,255,0.85); }
+
+.ink-surface { background: var(--ink-900); color: var(--paper); }
+.ink-surface h1, .ink-surface h2, .ink-surface h3 { color: var(--white); }
+.ink-surface p { color: var(--ink-300); }
+
+.container { max-width: var(--container-marketing); margin: 0 auto; padding: 0 var(--gutter-desktop); }
+@media (max-width: 720px) { .container { padding: 0 var(--gutter-mobile); } }

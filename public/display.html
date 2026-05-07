@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>NOC · Tríade Fibra</title>
+<link rel="stylesheet" href="/static/display.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="left">
+      <img src="/static/assets/logo-triade-vermelho.png" alt="Tríade Fibra">
+      <span class="divider"></span>
+      <span class="title">CENTRAL DE OPERAÇÕES · NOC</span>
+    </div>
+    <div class="center">
+      <div class="kpi crit"><span class="num" id="kpi-overdue">0</span><span class="lbl">Atrasadas</span></div>
+      <div class="kpi crit"><span class="num" id="kpi-critical">0</span><span class="lbl">Críticas</span></div>
+      <div class="kpi warn"><span class="num" id="kpi-warning">0</span><span class="lbl">Em alerta</span></div>
+      <div class="kpi"><span class="num" id="kpi-progress">0</span><span class="lbl">Em andamento</span></div>
+      <div class="kpi ok"><span class="num" id="kpi-done">0</span><span class="lbl">Concluídas hoje</span></div>
+    </div>
+    <div class="right">
+      <span class="live-pill"><span class="dot"></span>AO VIVO</span>
+      <span class="clock">
+        <span id="clock-time">--:--:--</span>
+        <span class="date" id="clock-date">--- · -- --- ----</span>
+      </span>
+    </div>
+  </header>
+
+  <section class="featured-row" id="featured-row"></section>
+  <section class="grid-row" id="grid-row"></section>
+
+  <footer class="bottombar">
+    <div class="crew">
+      <span><b>PLANTÃO</b> Supervisor NOC</span>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--u-over)"></span>Atrasada</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--u-crit)"></span>Crítica · &lt;15 min</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--u-warn)"></span>Alerta · &lt;1 h</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--u-ok)"></span>OK</span>
+    </div>
+    <div>SISTEMA NOC v1.0 · TRÍADE FIBRA</div>
+  </footer>
+
+<script src="/static/display.js"></script>
+</body>
+</html>

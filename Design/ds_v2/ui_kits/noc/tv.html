@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>NOC · Tríade Fibra</title>
+<link rel="stylesheet" href="tv.css">
+</head>
+<body>
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="left">
+      <img src="../../assets/logo-triade-vermelho.png" alt="Tríade Fibra">
+      <span class="divider"></span>
+      <span class="title">CENTRAL DE OPERAÇÕES · NOC</span>
+    </div>
+    <div class="center">
+      <div class="kpi crit"><span class="num" id="kpi-overdue">2</span><span class="lbl">Atrasadas</span></div>
+      <div class="kpi crit"><span class="num" id="kpi-critical">3</span><span class="lbl">Críticas</span></div>
+      <div class="kpi warn"><span class="num" id="kpi-warning">5</span><span class="lbl">Em alerta</span></div>
+      <div class="kpi"><span class="num" id="kpi-progress">4</span><span class="lbl">Em andamento</span></div>
+      <div class="kpi ok"><span class="num" id="kpi-done">1</span><span class="lbl">Concluídas hoje</span></div>
+    </div>
+    <div class="right">
+      <span class="live-pill"><span class="dot"></span>AO VIVO</span>
+      <span class="clock">
+        <span id="clock-time">14:32:18</span>
+        <span class="date" id="clock-date">QUI · 06 NOV 2026</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Featured row: 2 most urgent tasks -->
+  <section class="featured-row" id="featured-row"></section>
+
+  <!-- Standard grid -->
+  <section class="grid-row" id="grid-row"></section>
+
+  <!-- Bottom bar -->
+  <footer class="bottombar">
+    <div class="crew">
+      <span><b>PLANTÃO</b> Marcos R. · Bia M. · Diego S. · João T.</span>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background: var(--u-over)"></span>Atrasada</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: var(--u-crit)"></span>Crítica · &lt;15 min</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: var(--u-warn)"></span>Alerta · &lt;1 h</span>
+      <span class="legend-item"><span class="legend-swatch" style="background: var(--u-ok)"></span>OK</span>
+    </div>
+    <div>SISTEMA NOC v1.0 · TRÍADE FIBRA</div>
+  </footer>
+
+<script src="data.js"></script>
+<script>
+const tasks = window.NOC_TASKS;
+const N = window.NOC;
+
+function initials(name) {
+  return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function avatar(name) {
+  const colors = { 'Marcos R.': '#FF6B3D', 'Bia M.': '#7BC9FF', 'Diego S.': '#C58CFF', 'João T.': '#5BD6A8' };
+  const bg = colors[name] || '#3A322E';
+  return `<span class="avatar" style="background:${bg}33; color:${bg}; border-color:${bg}55">${initials(name)}</span>`;
+}
+
+function renderFeatured(task) {
+  const ms = N.msRemaining(task);
+  const u = N.urgencyLevel(task);
+  const overdueClass = u === 'overdue' ? 'overdue' : '';
+  const lbl = u === 'overdue' ? 'ATRASADA' : 'PRAZO RESTANTE';
+  return `
+    <article class="task-card featured ${overdueClass}" data-id="${task.id}">
+      <svg class="arc-bg" viewBox="0 0 800 200" preserveAspectRatio="none">
+        <path d="M -50 280 A 320 320 0 0 1 320 -40" fill="none" stroke="rgba(255,26,42,0.18)" stroke-width="1.5"/>
+        <path d="M -50 360 A 420 420 0 0 1 420 -80" fill="none" stroke="rgba(255,26,42,0.12)" stroke-width="1.5"/>
+        <path d="M -50 440 A 520 520 0 0 1 520 -120" fill="none" stroke="rgba(255,26,42,0.08)" stroke-width="1.5"/>
+      </svg>
+      <div class="content">
+        <div class="meta-row">
+          <span class="priority-chip ${task.priority}">${N.priorityLabel[task.priority]}</span>
+          <span class="tag-chip" style="color: ${N.tagColor[task.tag] || '#fff'}">${task.tag}</span>
+          <span class="location-chip">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M20 10c0 7-8 12-8 12s-8-5-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${task.location}
+          </span>
+        </div>
+        <h2>${task.title}</h2>
+        <p>${task.description}</p>
+        <div class="assignee">
+          ${avatar(task.assignee)}
+          <span><b style="color:var(--fg-1)">${task.assignee}</b> · ${N.statusLabel[task.status]}</span>
+        </div>
+      </div>
+      <div class="countdown-big ${u}">
+        <span class="lbl">${lbl}</span>
+        <span class="time" data-due="${task.dueAt}">${N.formatCountdown(ms)}</span>
+      </div>
+    </article>`;
+}
+
+function renderCard(task) {
+  const ms = N.msRemaining(task);
+  const u = N.urgencyLevel(task);
+  return `
+    <article class="task-card urgency-${u}" data-id="${task.id}">
+      <span class="left-stripe"></span>
+      <div class="meta-row">
+        <span class="priority-chip ${task.priority}">${N.priorityLabel[task.priority]}</span>
+        <span class="tag-chip" style="color: ${N.tagColor[task.tag] || '#fff'}">${task.tag}</span>
+      </div>
+      <h3>${task.title}</h3>
+      <div class="countdown-row">
+        <div class="countdown-mid ${u}" data-due="${task.dueAt}">${N.formatCountdown(ms)}</div>
+        <div class="footer">
+          <span class="person">${avatar(task.assignee)}<span>${task.assignee.split(' ')[0]}</span></span>
+        </div>
+      </div>
+      <div class="footer" style="margin-top: -4px;">
+        <span><span class="status-dot ${task.status}"></span>${N.statusLabel[task.status]}</span>
+        <span>${task.location}</span>
+      </div>
+    </article>`;
+}
+
+function urgencyOrder(t) {
+  const u = N.urgencyLevel(t);
+  return { overdue: 0, critical: 1, warning: 2, ok: 3 }[u] * 10000 + (t.dueAt - Date.now()) / 1000;
+}
+
+function render() {
+  // Filter out completed (only the most recent stays in KPI count, not on screen)
+  const open = tasks.filter(t => t.status !== 'done').sort((a, b) => urgencyOrder(a) - urgencyOrder(b));
+  const featured = open.slice(0, 2);
+  const rest = open.slice(2, 14); // up to 12 cards in grid (3 rows × 4)
+
+  document.getElementById('featured-row').innerHTML = featured.map(renderFeatured).join('');
+  document.getElementById('grid-row').innerHTML = rest.map(renderCard).join('');
+
+  // KPIs
+  const now = Date.now();
+  const overdue = open.filter(t => t.dueAt < now).length;
+  const critical = open.filter(t => N.urgencyLevel(t, now) === 'critical').length;
+  const warning  = open.filter(t => N.urgencyLevel(t, now) === 'warning').length;
+  const progress = tasks.filter(t => t.status === 'in_progress').length;
+  const done     = tasks.filter(t => t.status === 'done').length;
+  document.getElementById('kpi-overdue').textContent = overdue;
+  document.getElementById('kpi-critical').textContent = critical;
+  document.getElementById('kpi-warning').textContent = warning;
+  document.getElementById('kpi-progress').textContent = progress;
+  document.getElementById('kpi-done').textContent = done;
+}
+
+function tickCountdowns() {
+  const now = Date.now();
+  document.querySelectorAll('[data-due]').forEach(el => {
+    const due = +el.dataset.due;
+    el.textContent = N.formatCountdown(due - now);
+  });
+}
+
+function tickClock() {
+  const d = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  document.getElementById('clock-time').textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+  const months = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  document.getElementById('clock-date').textContent = `${days[d.getDay()]} · ${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+render();
+tickClock();
+tickCountdowns();
+setInterval(tickCountdowns, 1000);
+setInterval(tickClock, 1000);
+// Re-sort and re-render every 30s so urgency reordering catches up
+setInterval(render, 30000);
+</script>
+</body>
+</html>

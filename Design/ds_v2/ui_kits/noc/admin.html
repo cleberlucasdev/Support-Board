@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Admin · NOC Tríade Fibra</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="app" data-screen-label="NOC · Painel Admin">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="../../assets/logo-triade-vermelho.png" alt="Tríade">
+      <span class="badge">NOC</span>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Tarefas</div>
+      <div class="nav-item active">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/></svg>
+        <span>Ativas</span><span class="count">12</span>
+      </div>
+      <div class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Em andamento</span><span class="count">4</span>
+      </div>
+      <div class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.2-8.55"/><path d="M21 4v5h-5"/></svg>
+        <span>Histórico</span><span class="count">128</span>
+      </div>
+      <div class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span>Arquivadas</span><span class="count">42</span>
+      </div>
+
+      <div class="nav-section">TV</div>
+      <div class="nav-item">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Pré-visualizar</span>
+      </div>
+    </nav>
+
+    <div class="crew">
+      <div class="nav-section" style="margin: 0 4px 4px;">Plantão agora</div>
+      <div class="crew-item"><span class="av on" style="background:#FF6B3D33;color:#FF6B3D">MR</span>Marcos R.</div>
+      <div class="crew-item"><span class="av on" style="background:#7BC9FF33;color:#7BC9FF">BM</span>Bia M.</div>
+      <div class="crew-item"><span class="av on" style="background:#C58CFF33;color:#C58CFF">DS</span>Diego S.</div>
+      <div class="crew-item"><span class="av on" style="background:#5BD6A833;color:#5BD6A8">JT</span>João T.</div>
+    </div>
+  </aside>
+
+  <!-- List column -->
+  <section class="list-col">
+    <div class="list-header">
+      <div>
+        <h1>TAREFAS ATIVAS</h1>
+        <div class="sub">12 abertas · 2 atrasadas · ordenado por urgência</div>
+      </div>
+      <button class="btn-new">
+        <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova tarefa
+      </button>
+    </div>
+
+    <div class="list-toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Buscar tarefa, técnico, OLT…">
+      </div>
+      <div class="filter-pills">
+        <span class="pill active">TODAS</span>
+        <span class="pill">CRÍTICAS</span>
+        <span class="pill">INFRA</span>
+        <span class="pill">CLIENTE</span>
+        <span class="pill">CAMPO</span>
+        <span class="pill">BACKBONE</span>
+      </div>
+    </div>
+
+    <div class="list-rows" id="list-rows"></div>
+  </section>
+
+  <!-- Edit panel -->
+  <aside class="edit-panel" id="edit-panel"></aside>
+</div>
+
+<script src="data.js"></script>
+<script>
+const N = window.NOC;
+const tasks = window.NOC_TASKS;
+let selectedId = 't-001';
+
+function initials(name) { return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase(); }
+function avatarColor(name) { return ({ 'Marcos R.': '#FF6B3D', 'Bia M.': '#7BC9FF', 'Diego S.': '#C58CFF', 'João T.': '#5BD6A8' })[name] || '#7E7670'; }
+
+function urgencyOrder(t) {
+  const u = N.urgencyLevel(t);
+  return { overdue: 0, critical: 1, warning: 2, ok: 3 }[u] * 10000 + (t.dueAt - Date.now()) / 1000;
+}
+
+function renderRow(t) {
+  const u = N.urgencyLevel(t);
+  const c = avatarColor(t.assignee);
+  const isDone = t.status === 'done';
+  return `
+    <div class="task-row urgency-${u} ${selectedId === t.id ? 'selected' : ''}" data-id="${t.id}" onclick="selectTask('${t.id}')">
+      <span class="row-stripe"></span>
+      <span class="row-checkbox ${isDone ? 'done' : ''}" onclick="event.stopPropagation(); toggleDone('${t.id}')">${isDone ? '✓' : ''}</span>
+      <div class="row-main">
+        <div class="row-title">${t.title}</div>
+        <div class="row-meta">
+          <span class="pri ${t.priority}">${N.priorityLabel[t.priority]}</span>
+          <span>·</span>
+          <span class="tag" style="color: ${N.tagColor[t.tag]}">${t.tag}</span>
+          <span>·</span>
+          <span>${t.location}</span>
+        </div>
+      </div>
+      <div class="row-due ${u}">${u === 'overdue' ? N.formatCountdown(N.msRemaining(t)) : N.formatDueLabel(t)}</div>
+      <span class="row-assignee" style="background:${c}33;color:${c}">${initials(t.assignee)}</span>
+    </div>`;
+}
+
+function renderEditPanel(t) {
+  if (!t) {
+    document.getElementById('edit-panel').innerHTML = '<div style="padding:60px 24px; color:var(--fg-3); text-align:center;">Selecione uma tarefa para editar.</div>';
+    return;
+  }
+  const u = N.urgencyLevel(t);
+  const c = avatarColor(t.assignee);
+  document.getElementById('edit-panel').innerHTML = `
+    <div class="edit-header">
+      <h2>EDITAR TAREFA · #${t.id.replace('t-', '')}</h2>
+      <div style="display:flex;gap:6px">
+        <button class="icon-btn" title="Duplicar">
+          <svg class="ico" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="icon-btn danger" title="Excluir">
+          <svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="edit-body">
+
+      <div class="field title">
+        <label>Título</label>
+        <input type="text" value="${t.title.replace(/"/g, '&quot;')}">
+      </div>
+
+      <div class="field">
+        <label>Descrição</label>
+        <textarea>${t.description}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Prioridade</label>
+        <div class="priority-group">
+          <input type="radio" name="pri" id="pri-c" ${t.priority==='critical'?'checked':''}>
+          <label for="pri-c" data-p="critical">CRÍTICA</label>
+          <input type="radio" name="pri" id="pri-h" ${t.priority==='high'?'checked':''}>
+          <label for="pri-h" data-p="high">ALTA</label>
+          <input type="radio" name="pri" id="pri-n" ${t.priority==='normal'?'checked':''}>
+          <label for="pri-n" data-p="normal">NORMAL</label>
+          <input type="radio" name="pri" id="pri-l" ${t.priority==='low'?'checked':''}>
+          <label for="pri-l" data-p="low">BAIXA</label>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="field">
+          <label>Prazo</label>
+          <input type="text" value="${new Date(t.dueAt).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}">
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select>
+            <option ${t.tag==='INFRA'?'selected':''}>INFRA</option>
+            <option ${t.tag==='CLIENTE'?'selected':''}>CLIENTE</option>
+            <option ${t.tag==='BACKBONE'?'selected':''}>BACKBONE</option>
+            <option ${t.tag==='CAMPO'?'selected':''}>CAMPO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="field">
+          <label>Responsável</label>
+          <select>
+            <option ${t.assignee==='Marcos R.'?'selected':''}>Marcos R.</option>
+            <option ${t.assignee==='Bia M.'?'selected':''}>Bia M.</option>
+            <option ${t.assignee==='Diego S.'?'selected':''}>Diego S.</option>
+            <option ${t.assignee==='João T.'?'selected':''}>João T.</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Local</label>
+          <input type="text" value="${t.location}">
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:8px">
+        <span class="tv-preview-link">
+          <svg class="ico" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <b>Visível na TV</b> · prazo restante <b style="color:var(--fg-1)">${u==='overdue'?'ATRASADA':N.formatDueLabel(t)}</b>
+        </span>
+      </div>
+
+      <div class="timeline">
+        <h4>Histórico</h4>
+        <div class="timeline-item now"><span class="dot"></span><div><div>Status alterado para <b style="color:var(--fg-1)">${N.statusLabel[t.status]}</b> por ${t.assignee}</div><time>há 12 min</time></div></div>
+        <div class="timeline-item done"><span class="dot"></span><div><div>Atribuída a <b style="color:var(--fg-1)">${t.assignee}</b></div><time>há 25 min</time></div></div>
+        <div class="timeline-item done"><span class="dot"></span><div><div>Tarefa criada por Supervisor</div><time>há 38 min</time></div></div>
+      </div>
+    </div>
+
+    <div class="edit-actions">
+      <button class="btn btn-success">✓ Marcar concluída</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn">Cancelar</button>
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectTask(id) {
+  selectedId = id;
+  renderList();
+  renderEditPanel(tasks.find(t => t.id === id));
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t => t.id === id);
+  t.status = t.status === 'done' ? 'todo' : 'done';
+  renderList();
+}
+
+function renderList() {
+  const sorted = [...tasks].filter(t => t.status !== 'done').sort((a, b) => urgencyOrder(a) - urgencyOrder(b));
+  document.getElementById('list-rows').innerHTML = sorted.map(renderRow).join('');
+}
+
+function tickRowsRow() {
+  document.querySelectorAll('.row-due.overdue').forEach(el => {
+    const t = tasks.find(x => x.id === el.closest('.task-row').dataset.id);
+    if (t) el.textContent = N.formatCountdown(N.msRemaining(t));
+  });
+}
+
+renderList();
+renderEditPanel(tasks.find(t => t.id === selectedId));
+setInterval(tickRowsRow, 1000);
+</script>
+</body>
+</html>
