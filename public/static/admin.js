@@ -65,9 +65,14 @@ function esc(s) {
 }
 
 function urgencyOrder(t) {
-  const u = N.urgencyLevel(t);
-  const ms = t.dueAt !== null ? t.dueAt - Date.now() : Infinity;
-  return { overdue: 0, critical: 1, warning: 2, ok: 3 }[u] * 1_000_000 + ms / 1000;
+  const mult = { critical: 4, high: 2, normal: 1, low: 0.5 }[t.priority] || 1;
+  if (t.dueAt === null) {
+    // No deadline: strict priority order, always after any task with a deadline
+    return 1e9 + { critical: 0, high: 1, normal: 2, low: 3 }[t.priority] * 1e6;
+  }
+  const sec = (t.dueAt - Date.now()) / 1000;
+  if (sec < 0) return sec; // overdue: most negative = most urgent
+  return sec / mult;       // effective time: lower = more urgent
 }
 
 function pad(n) { return n.toString().padStart(2, '0'); }
