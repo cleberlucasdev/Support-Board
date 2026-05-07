@@ -176,9 +176,8 @@ body {
 .grid-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: max-content;
+  grid-auto-rows: 220px;
   align-content: start;
-  align-items: start;
   gap: 12px;
   padding: 4px 40px 0;
 }
