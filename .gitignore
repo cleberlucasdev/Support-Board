@@ -9,7 +9,7 @@ venv/
 *.egg-info/
 
 # local-only files (not needed in cloud deployment)
-static/
+/static/
 mariadb/
 server.log
 server.err
