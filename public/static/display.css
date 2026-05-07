@@ -95,7 +95,7 @@ body {
 
 .task-card.featured {
   position: relative;
-  padding: 28px 32px;
+  padding: 24px 28px;
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(255, 26, 42, 0.18), rgba(255, 26, 42, 0.04));
   border: 2px solid var(--u-over);
@@ -104,7 +104,7 @@ body {
   grid-template-columns: 1fr auto;
   gap: 24px;
   align-items: center;
-  min-height: 200px;
+  min-height: 168px;
 }
 .task-card.featured.overdue { animation: pulse-border 1.4s ease-in-out infinite; }
 @keyframes pulse-border {
@@ -176,12 +176,8 @@ body {
 .grid-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 1fr;
   gap: 12px;
-  padding: 8px 40px 0;
-  flex: 1;
-  min-height: 0;
-  align-content: stretch;
+  padding: 4px 40px 0;
 }
 .grid-row:empty { display: none; }
 
@@ -189,13 +185,12 @@ body {
   background: var(--bg-1);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 22px 24px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   position: relative;
   overflow: hidden;
-  height: 100%;
 }
 
 .task-card.urgency-critical { border-color: rgba(255, 90, 71, 0.5); background: linear-gradient(180deg, rgba(255, 90, 71, 0.08), var(--bg-1) 60%); }
@@ -216,13 +211,12 @@ body {
 
 .task-card h3 {
   font-family: var(--font-body);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
   color: var(--fg-1);
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
 .task-card .countdown-row {
@@ -233,7 +227,7 @@ body {
 .countdown-mid {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
