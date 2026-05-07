@@ -89,6 +89,7 @@ let selectedId = null;
 let navFilter = 'active';
 let urgencyFilter = 'all';
 let searchQuery = '';
+let panelDirty = false; // true while user has unsaved changes in the panel
 
 // ── load ──────────────────────────────────────────────────────────────────
 async function loadTasks() {
@@ -98,7 +99,7 @@ async function loadTasks() {
     tasks = (await res.json()).map(adaptTask);
     renderList();
     updateNavCounts();
-    if (selectedId !== null) {
+    if (selectedId !== null && !panelDirty) {
       const t = tasks.find(x => x.id === selectedId);
       if (t) populatePanel(t);
     }
@@ -174,6 +175,7 @@ function updateNavCounts() {
 // ── selection ─────────────────────────────────────────────────────────────
 function selectTask(id) {
   selectedId = id;
+  panelDirty = false;
   const t = tasks.find(x => x.id === id);
   if (t) populatePanel(t);
   renderList();
@@ -281,6 +283,7 @@ function populatePanel(t) {
 
 function showNewForm() {
   selectedId = null;
+  panelDirty = false;
   renderList();
   const panelHtml = `
     <div class="edit-header">
@@ -332,6 +335,7 @@ function showNewForm() {
 
 function clearPanel() {
   selectedId = null;
+  panelDirty = false;
   document.getElementById('edit-panel').innerHTML =
     '<div style="padding:60px 24px;color:var(--fg-3);text-align:center">Selecione uma tarefa ou crie uma nova.</div>';
   renderList();
@@ -375,6 +379,7 @@ document.getElementById('edit-panel').addEventListener('click', async (e) => {
       if (res.ok) { const j = await res.json(); selectedId = j.id; }
     }
     if (!res.ok) { alert('Erro ao salvar.'); return; }
+    panelDirty = false;
     await loadTasks();
     const t = tasks.find(x => x.id === selectedId);
     if (t) populatePanel(t);
@@ -434,11 +439,16 @@ document.getElementById('edit-panel').addEventListener('click', async (e) => {
   }
 });
 
+document.getElementById('edit-panel').addEventListener('input', () => {
+  panelDirty = true;
+});
+
 document.getElementById('edit-panel').addEventListener('change', (e) => {
   if (e.target.name === 'has_timer') {
     const tf = document.getElementById('timer-fields');
     if (tf) tf.hidden = !e.target.checked;
   }
+  panelDirty = true;
 });
 
 // ── nav / filter bindings ─────────────────────────────────────────────────
